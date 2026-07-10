@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe - Premium</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --bg-primary: #121824;
+            --bg-secondary: #1e293b;
+            --color-x: #ff5722;
+            --color-x-light: #ff7043;
+            --color-o: #00adb5;
+            --color-o-light: #00f5ff;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #6366f1;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-x: hidden;
+        }
+
+        .container-custom {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 450px;
+            width: 100%;
+        }
+
+        .header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            margin: 0;
+            color: var(--text-main);
+            font-weight: 800;
+            letter-spacing: -0.05em;
+            text-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        h1 span {
+            color: var(--color-o);
+        }
+
+        /* Marcador Moderno */
+        .scoreboard {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .score-card {
+            flex: 1;
+            background-color: var(--bg-secondary);
+            border: 2px solid transparent;
+            padding: 12px;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .score-card.active-x {
+            border-color: var(--color-x);
+            box-shadow: 0 0 15px rgba(255, 87, 34, 0.25);
+        }
+
+        .score-card.active-o {
+            border-color: var(--color-o);
+            box-shadow: 0 0 15px rgba(0, 173, 181, 0.25);
+        }
+
+        .player-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            font-weight: 700;
+        }
+
+        .score-val {
+            font-size: 1.8rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .score-card.score-x .score-val { color: var(--color-x); }
+        .score-card.score-o .score-val { color: var(--color-o); }
+
+        .turn-indicator {
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--text-main);
+            color: var(--bg-primary);
+            font-size: 0.65rem;
+            font-weight: 800;
+            padding: 2px 10px;
+            border-radius: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .score-card.active-x .turn-indicator,
+        .score-card.active-o .turn-indicator {
+            opacity: 1;
+        }
+
+        #status {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            font-weight: 600;
+            color: var(--text-muted);
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            transition: color 0.3s;
+        }
+
+        #status.highlight {
+            color: var(--text-main);
+            animation: pulse 1.5s infinite;
+        }
+
+        .board-wrapper {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1;
+            max-width: 380px;
+            background-color: var(--bg-secondary);
+            padding: 12px;
+            border-radius: 24px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 
+                        0 10px 10px -5px rgba(0, 0, 0, 0.2);
+            margin-bottom: 25px;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 12px;
+            height: 100%;
+            width: 100%;
+        }
+
+        .cell {
+            background-color: var(--bg-primary);
+            border: none;
+            border-radius: 16px;
+            font-size: 3rem;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            user-select: none;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .cell:hover:not(.x):not(.o):not(:disabled) {
+            background-color: #1e293b;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .cell:active {
+            transform: scale(0.95);
+        }
+
+        .cell.x {
+            color: var(--color-x);
+            text-shadow: 0 0 15px rgba(255, 87, 34, 0.4);
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .cell.o {
+            color: var(--color-o);
+            text-shadow: 0 0 15px rgba(0, 173, 181, 0.4);
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* Capas sobrepuestas (SVG y Canvas) */
+        #strike-svg {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            width: calc(100% - 24px);
+            height: calc(100% - 24px);
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        #strike-line {
+            stroke-dasharray: 150;
+            stroke-dashoffset: 150;
+            transition: stroke-dashoffset 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        #confetti-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9;
+        }
+
+        /* Botón de Sonido Flotante */
+        .icon-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-muted);
+            border-radius: 12px;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .icon-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+            transform: scale(1.05);
+        }
+
+        .icon-btn.muted {
+            color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.2);
+            background: rgba(239, 68, 68, 0.05);
+        }
+
+        /* Grupo de Botones */
+        .button-group {
+            display: flex;
+            width: 100%;
+            gap: 15px;
+        }
+
+        button.btn {
+            flex: 1;
+            padding: 14px 20px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        button.btn:active {
+            transform: scale(0.98);
+        }
+
+        #next-btn {
+            background-color: var(--accent);
+            color: #ffffff;
+        }
+
+        #next-btn:hover {
+            background-color: #4f46e5;
+            box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.4);
+        }
+
+        #reset-score-btn {
+            background-color: #334155;
+            color: #cbd5e1;
+        }
+
+        #reset-score-btn:hover {
+            background-color: #475569;
+            color: #f1f5f9;
+        }
+
+        /* Animaciones */
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        @keyframes winPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .win-animation {
+            animation: winPulse 0.5s ease-in-out 3;
+        }
+
+        /* Responsivo en móviles muy pequeños */
+        @media (max-width: 380px) {
+            h1 { font-size: 1.8rem; }
+            .score-card { padding: 10px; }
+            .score-val { font-size: 1.5rem; }
+            .cell { font-size: 2.2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container-custom">
+        <div class="header-row">
+            <h1>GATO <span>PREMIUM</span></h1>
+            <button id="mute-btn" class="icon-btn" aria-label="Silenciar juego">
+                <svg id="sound-icon" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                    <path id="sound-path" d="M14 3.23v17.54c3.39-1.07 6-4.22 6-8s-2.61-6.93-6-7.77zm-8 5.77H2v6h4l5 5V4L6 9z"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Marcadores Visuales -->
+        <div class="scoreboard">
+            <div id="card-x" class="score-card score-x active-x">
+                <span class="turn-indicator">Turno</span>
+                <div class="player-label">Jugador X</div>
+                <div id="score-x-val" class="score-val">0</div>
+            </div>
+            <div id="card-o" class="score-card score-o">
+                <span class="turn-indicator">Turno</span>
+                <div class="player-label">Jugador O</div>
+                <div id="score-o-val" class="score-val">0</div>
+            </div>
+        </div>
+
+        <!-- Mensaje de Estado -->
+        <div id="status">Turno de: X</div>
+
+        <div class="board-wrapper">
+            <canvas id="confetti-canvas"></canvas>
+            <!-- 
+              La etiqueta SVG ahora tiene un viewBox="0 0 100 100" y preserveAspectRatio="none".
+              Esto obliga al navegador a usar coordenadas lógicas proporcionales (de 0 a 100) en lugar de píxeles absolutos.
+            -->
+            <svg id="strike-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+                <line id="strike-line" x1="0" y1="0" x2="0" y2="0" stroke="transparent" stroke-width="3.5" stroke-linecap="round" />
+            </svg>
+            <div class="board" id="board">
+                <button class="cell" data-index="0" aria-label="Casilla 1"></button>
+                <button class="cell" data-index="1" aria-label="Casilla 2"></button>
+                <button class="cell" data-index="2" aria-label="Casilla 3"></button>
+                <button class="cell" data-index="3" aria-label="Casilla 4"></button>
+                <button class="cell" data-index="4" aria-label="Casilla 5"></button>
+                <button class="cell" data-index="5" aria-label="Casilla 6"></button>
+                <button class="cell" data-index="6" aria-label="Casilla 7"></button>
+                <button class="cell" data-index="7" aria-label="Casilla 8"></button>
+                <button class="cell" data-index="8" aria-label="Casilla 9"></button>
+            </div>
+        </div>
+
+        <!-- Botones de Acción -->
+        <div class="button-group">
+            <button id="next-btn" class="btn">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M5.536 21.886a1.004 1.004 0 0 1-1.036-.056A1.002 1.002 0 0 1 4 21V3a1 1 0 0 1 .5-.866 1 1 0 0 1 .15-.056.994.994 0 0 1 .886.076l14 9a1 1 0 0 1 0 1.772l-14 9a1.004 1.004 0 0 1-.5.124z"/></svg>
+                Siguiente Partida
+            </button>
+            <button id="reset-score-btn" class="btn">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
+                Reiniciar
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const board = document.getElementById('board');
+        const cells = document.querySelectorAll('.cell');
+        const statusText = document.getElementById('status');
+        const nextBtn = document.getElementById('next-btn');
+        const resetScoreBtn = document.getElementById('reset-score-btn');
+        
+        const cardX = document.getElementById('card-x');
+        const cardO = document.getElementById('card-o');
+        const scoreXText = document.getElementById('score-x-val');
+        const scoreOText = document.getElementById('score-o-val');
+        const strikeLine = document.getElementById('strike-line');
+        const muteBtn = document.getElementById('mute-btn');
+        const soundPath = document.getElementById('sound-path');
+
+        // Estado del juego
+        let gameState = ["", "", "", "", "", "", "", "", ""];
+        let gameActive = true;
+        let currentTurn = "X"; 
+        let nextGameStarter = "X"; 
+        let soundMuted = false;
+
+        // Marcador acumulado
+        let scoreX = 0;
+        let scoreO = 0;
+
+        // Sintetizador de audio integrado (Web Audio API)
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(type) {
+            if (soundMuted) return;
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            const now = audioCtx.currentTime;
+            
+            if (type === 'click-x') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(300, now);
+                osc.frequency.exponentialRampToValueAtTime(150, now + 0.1);
+                gainNode.gain.setValueAtTime(0.15, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                osc.start(now);
+                osc.stop(now + 0.1);
+            } else if (type === 'click-o') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(450, now);
+                osc.frequency.exponentialRampToValueAtTime(220, now + 0.1);
+                gainNode.gain.setValueAtTime(0.15, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                osc.start(now);
+                osc.stop(now + 0.1);
+            } else if (type === 'win') {
+                const notes = [261.63, 329.63, 392.00, 523.25]; // Acorde mayor de Do
+                notes.forEach((freq, idx) => {
+                    const nOsc = audioCtx.createOscillator();
+                    const nGain = audioCtx.createGain();
+                    nOsc.connect(nGain);
+                    nGain.connect(audioCtx.destination);
+                    nOsc.type = 'triangle';
+                    nOsc.frequency.setValueAtTime(freq, now + idx * 0.08);
+                    nGain.gain.setValueAtTime(0, now);
+                    nGain.gain.linearRampToValueAtTime(0.12, now + idx * 0.08 + 0.04);
+                    nGain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.08 + 0.4);
+                    nOsc.start(now + idx * 0.08);
+                    nOsc.stop(now + idx * 0.08 + 0.4);
+                });
+            } else if (type === 'draw') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(180, now);
+                osc.frequency.linearRampToValueAtTime(80, now + 0.4);
+                gainNode.gain.setValueAtTime(0.08, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                osc.start(now);
+                osc.stop(now + 0.4);
+            } else if (type === 'reset') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(150, now);
+                osc.frequency.exponentialRampToValueAtTime(600, now + 0.25);
+                gainNode.gain.setValueAtTime(0.1, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+                osc.start(now);
+                osc.stop(now + 0.25);
+            }
+        }
+
+        const confettiCanvas = document.getElementById('confetti-canvas');
+        const ctx = confettiCanvas.getContext('2d');
+        let particles = [];
+        let animationFrameId = null;
+
+        function resizeConfetti() {
+            confettiCanvas.width = confettiCanvas.parentElement.clientWidth;
+            confettiCanvas.height = confettiCanvas.parentElement.clientHeight;
+        }
+
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.size = Math.random() * 5 + 4;
+                this.speedX = (Math.random() - 0.5) * 8;
+                this.speedY = (Math.random() - 0.5) * 6 - 4; // Impulso inicial hacia arriba
+                this.color = color;
+                this.gravity = 0.15;
+                this.alpha = 1;
+                this.decay = Math.random() * 0.012 + 0.008;
+            }
+            update() {
+                this.speedY += this.gravity;
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.alpha -= this.decay;
+            }
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        function triggerConfetti(centerX, centerY, player) {
+            resizeConfetti();
+            particles = [];
+            const colors = player === 'X' 
+                ? ['#ff5722', '#ff7043', '#ff8a65', '#ffffff'] 
+                : ['#00adb5', '#00f5ff', '#33ecf0', '#ffffff'];
+            
+            for (let i = 0; i < 65; i++) {
+                const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                particles.push(new Particle(centerX, centerY, randomColor));
+            }
+            
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+            animateParticles();
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+            particles.forEach((p, index) => {
+                p.update();
+                p.draw();
+                if (p.alpha <= 0) {
+                    particles.splice(index, 1);
+                }
+            });
+            
+            if (particles.length > 0) {
+                animationFrameId = requestAnimationFrame(animateParticles);
+            }
+        }
+
+        const winningConditions = [
+            // Horizontales
+            { combo: [0, 1, 2], coords: { x1: 5, y1: 16.6, x2: 95, y2: 16.6 } },
+            { combo: [3, 4, 5], coords: { x1: 5, y1: 50, x2: 95, y2: 50 } },
+            { combo: [6, 7, 8], coords: { x1: 5, y1: 83.3, x2: 95, y2: 83.3 } },
+            // Verticales
+            { combo: [0, 3, 6], coords: { x1: 16.6, y1: 5, x2: 16.6, y2: 95 } },
+            { combo: [1, 4, 7], coords: { x1: 50, y1: 5, x2: 50, y2: 95 } },
+            { combo: [2, 5, 8], coords: { x1: 83.3, y1: 5, x2: 83.3, y2: 95 } },
+            // Diagonales (Perfectamente alineadas en el espacio 100x100)
+            { combo: [0, 4, 8], coords: { x1: 8, y1: 8, x2: 92, y2: 92 } },
+            { combo: [2, 4, 6], coords: { x1: 92, y1: 8, x2: 8, y2: 92 } }
+        ];
+
+        function handleCellClick(e) {
+            const clickedCell = e.target;
+            const clickedCellIndex = parseInt(clickedCell.getAttribute('data-index'));
+
+            if (gameState[clickedCellIndex] !== "" || !gameActive) {
+                return;
+            }
+
+            // Reproduce el sonido de clic único
+            playSound(currentTurn === 'X' ? 'click-x' : 'click-o');
+
+            gameState[clickedCellIndex] = currentTurn;
+            clickedCell.textContent = currentTurn;
+            clickedCell.classList.add(currentTurn.toLowerCase());
+            clickedCell.setAttribute('disabled', 'true');
+
+            checkResult();
+        }
+
+        function drawStrikeLine(coords) {
+            const color = currentTurn === 'X' ? 'var(--color-x)' : 'var(--color-o)';
+            const shadow = currentTurn === 'X' ? 'rgba(255, 87, 34, 0.6)' : 'rgba(0, 173, 181, 0.6)';
+            
+            // Asignar coordenadas vectoriales al elemento de la línea
+            strikeLine.setAttribute('x1', coords.x1);
+            strikeLine.setAttribute('y1', coords.y1);
+            strikeLine.setAttribute('x2', coords.x2);
+            strikeLine.setAttribute('y2', coords.y2);
+            
+            // Estilizar trazo y añadir resplandor
+            strikeLine.setAttribute('stroke', color);
+            strikeLine.style.filter = `drop-shadow(0 0 8px ${shadow})`;
+            
+            // Forzar animación del dibujado físico
+            strikeLine.style.strokeDashoffset = '150';
+            void strikeLine.offsetWidth; // Forzar reflujo de renderizado del navegador
+            strikeLine.style.strokeDashoffset = '0';
+        }
+
+        function checkResult() {
+            let roundWon = false;
+            let winConditionObj = null;
+
+            for (let i = 0; i < winningConditions.length; i++) {
+                const cond = winningConditions[i];
+                let a = gameState[cond.combo[0]];
+                let b = gameState[cond.combo[1]];
+                let c = gameState[cond.combo[2]];
+
+                if (a === '' || b === '' || c === '') {
+                    continue;
+                }
+                if (a === b && b === c) {
+                    roundWon = true;
+                    winConditionObj = cond;
+                    break;
+                }
+            }
+
+            if (roundWon) {
+                statusText.textContent = `¡Ganó ${currentTurn}! Próxima ronda inicia él.`;
+                statusText.classList.add('highlight');
+                nextGameStarter = currentTurn; 
+                
+                // Dibujar la línea sobre el lienzo SVG
+                drawStrikeLine(winConditionObj.coords);
+
+                // Destacar visualmente las casillas ganadoras
+                winConditionObj.combo.forEach(idx => {
+                    cells[idx].classList.add('win-animation');
+                });
+
+                // Efectos Premium: Explosión de Confeti y Acorde de Victoria
+                const canvasW = confettiCanvas.clientWidth;
+                const canvasH = confettiCanvas.clientHeight;
+                triggerConfetti(canvasW / 2, canvasH / 2, currentTurn);
+                playSound('win');
+
+                // Sumar punto al ganador
+                if (currentTurn === "X") {
+                    scoreX++;
+                    scoreXText.textContent = scoreX;
+                } else {
+                    scoreO++;
+                    scoreOText.textContent = scoreO;
+                }
+
+                gameActive = false;
+                updateTurnCards(null); // Quitar el indicador de turno de ambos
+                return;
+            }
+
+            let roundDraw = !gameState.includes("");
+            if (roundDraw) {
+                statusText.textContent = "¡Empate! Inicia el mismo jugador.";
+                statusText.classList.add('highlight');
+                playSound('draw');
+                gameActive = false;
+                updateTurnCards(null);
+                return;
+            }
+
+            // Cambiar turno
+            currentTurn = currentTurn === "X" ? "O" : "X";
+            statusText.textContent = `Turno de: ${currentTurn}`;
+            updateTurnCards(currentTurn);
+        }
+
+        function updateTurnCards(turn) {
+            if (turn === "X") {
+                cardX.classList.add('active-x');
+                cardO.classList.remove('active-o');
+            } else if (turn === "O") {
+                cardO.classList.add('active-o');
+                cardX.classList.remove('active-x');
+            } else {
+                cardX.classList.remove('active-x');
+                cardO.classList.remove('active-o');
+            }
+        }
+
+        // Siguiente partida manteniendo puntajes
+        function nextGame() {
+            gameState = ["", "", "", "", "", "", "", "", ""];
+            gameActive = true;
+            currentTurn = nextGameStarter; 
+            statusText.textContent = `Turno de: ${currentTurn}`;
+            statusText.classList.remove('highlight');
+            
+            // Ocultar y vaciar la línea ganadora de forma limpia
+            strikeLine.style.strokeDashoffset = '150';
+            setTimeout(() => {
+                strikeLine.setAttribute('stroke', 'transparent');
+            }, 300);
+
+            // Limpiar confeti acumulado
+            ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+            particles = [];
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+
+            // Restaurar celdas
+            cells.forEach(cell => {
+                cell.textContent = "";
+                cell.className = "cell";
+                cell.removeAttribute('disabled');
+            });
+
+            updateTurnCards(currentTurn);
+        }
+
+        // Reiniciar puntuaciones y juego por completo
+        function resetScore() {
+            scoreX = 0;
+            scoreO = 0;
+            scoreXText.textContent = "0";
+            scoreOText.textContent = "0";
+            
+            nextGameStarter = "X"; 
+            nextGame();
+        }
+
+        board.addEventListener('click', (e) => {
+            if(e.target.classList.contains('cell')) {
+                handleCellClick(e);
+            }
+        });
+        
+        nextBtn.addEventListener('click', () => {
+            playSound('reset');
+            nextGame();
+        });
+
+        resetScoreBtn.addEventListener('click', () => {
+            playSound('reset');
+            resetScore();
+        });
+
+        // Toggle del silenciador de sonido
+        muteBtn.addEventListener('click', () => {
+            soundMuted = !soundMuted;
+            muteBtn.classList.toggle('muted', soundMuted);
+            if (soundMuted) {
+                // Icono Silenciado
+                soundPath.setAttribute('d', 'M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77zm-2-1.23L6 7H2v10h4l5 5V2zm-2 13.59L7.41 13H4v-2h3.41L10 8.41v7.18z');
+            } else {
+                // Icono Sonando
+                soundPath.setAttribute('d', 'M14 3.23v17.54c3.39-1.07 6-4.22 6-8s-2.61-6.93-6-7.77zm-8 5.77H2v6h4l5 5V4L6 9z');
+                playSound('click-x');
+            }
+        });
+
+        // Asegurar que el canvas responda al cambio de tamaño de la ventana
+        window.addEventListener('resize', resizeConfetti);
+    </script>
+</body>
+</html>
