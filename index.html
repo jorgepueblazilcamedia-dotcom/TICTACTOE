@@ -27,18 +27,21 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
+            min-height: 100dvh; /* Soporte perfecto para navegadores móviles modernos */
             margin: 0;
-            padding: 20px;
+            padding: 12px;
             box-sizing: border-box;
             overflow-x: hidden;
+            touch-action: manipulation; /* Elimina retrasos de toque y zoom accidental */
         }
 
         .container-custom {
             display: flex;
             flex-direction: column;
             align-items: center;
-            max-width: 450px;
+            max-width: 420px;
             width: 100%;
+            margin: auto;
         }
 
         .header-row {
@@ -46,11 +49,11 @@
             align-items: center;
             justify-content: space-between;
             width: 100%;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
 
         h1 {
-            font-size: 2.2rem;
+            font-size: clamp(1.5rem, 6vw, 2.2rem);
             margin: 0;
             color: var(--text-main);
             font-weight: 800;
@@ -67,15 +70,15 @@
             display: flex;
             justify-content: space-between;
             width: 100%;
-            gap: 16px;
-            margin-bottom: 20px;
+            gap: 12px;
+            margin-bottom: 14px;
         }
 
         .score-card {
             flex: 1;
             background-color: var(--bg-secondary);
             border: 2px solid transparent;
-            padding: 12px;
+            padding: 8px 10px;
             border-radius: 16px;
             text-align: center;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
@@ -94,16 +97,16 @@
         }
 
         .player-label {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 0.1em;
             color: var(--text-muted);
-            margin-bottom: 4px;
+            margin-bottom: 2px;
             font-weight: 700;
         }
 
         .score-val {
-            font-size: 1.8rem;
+            font-size: clamp(1.4rem, 5vw, 1.8rem);
             font-weight: 800;
             line-height: 1;
         }
@@ -118,14 +121,15 @@
             transform: translateX(-50%);
             background: var(--text-main);
             color: var(--bg-primary);
-            font-size: 0.65rem;
+            font-size: 0.6rem;
             font-weight: 800;
-            padding: 2px 10px;
+            padding: 2px 8px;
             border-radius: 10px;
             text-transform: uppercase;
             letter-spacing: 0.05em;
             opacity: 0;
             transition: opacity 0.2s ease;
+            white-space: nowrap;
         }
 
         .score-card.active-x .turn-indicator,
@@ -134,11 +138,11 @@
         }
 
         #status {
-            font-size: 1.1rem;
-            margin-bottom: 20px;
+            font-size: clamp(0.95rem, 4vw, 1.1rem);
+            margin-bottom: 14px;
             font-weight: 600;
             color: var(--text-muted);
-            height: 28px;
+            height: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -157,11 +161,11 @@
             aspect-ratio: 1;
             max-width: 380px;
             background-color: var(--bg-secondary);
-            padding: 12px;
+            padding: 10px;
             border-radius: 24px;
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 
                         0 10px 10px -5px rgba(0, 0, 0, 0.2);
-            margin-bottom: 25px;
+            margin-bottom: 16px;
             box-sizing: border-box;
             overflow: hidden;
         }
@@ -170,7 +174,7 @@
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             grid-template-rows: repeat(3, 1fr);
-            gap: 12px;
+            gap: 8px;
             height: 100%;
             width: 100%;
         }
@@ -179,7 +183,7 @@
             background-color: var(--bg-primary);
             border: none;
             border-radius: 16px;
-            font-size: 3rem;
+            font-size: clamp(2.2rem, 10vw, 3rem);
             font-weight: 800;
             cursor: pointer;
             display: flex;
@@ -189,6 +193,7 @@
             user-select: none;
             outline: none;
             -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
         }
 
         .cell:hover:not(.x):not(.o):not(:disabled) {
@@ -197,8 +202,9 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
 
-        .cell:active {
-            transform: scale(0.95);
+        .cell:active:not(:disabled) {
+            transform: scale(0.92);
+            background-color: #273549;
         }
 
         .cell.x {
@@ -216,10 +222,10 @@
         /* Capas sobrepuestas (SVG y Canvas) */
         #strike-svg {
             position: absolute;
-            top: 12px;
-            left: 12px;
-            width: calc(100% - 24px);
-            height: calc(100% - 24px);
+            top: 10px;
+            left: 10px;
+            width: calc(100% - 20px);
+            height: calc(100% - 20px);
             z-index: 10;
             pointer-events: none;
         }
@@ -246,19 +252,18 @@
             border: 2px solid rgba(255, 255, 255, 0.1);
             color: var(--text-muted);
             border-radius: 12px;
-            width: 44px;
-            height: 44px;
+            min-width: 44px;
+            min-height: 44px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             transition: all 0.2s;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        .icon-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: var(--text-main);
-            transform: scale(1.05);
+        .icon-btn:active {
+            transform: scale(0.92);
         }
 
         .icon-btn.muted {
@@ -271,13 +276,13 @@
         .button-group {
             display: flex;
             width: 100%;
-            gap: 15px;
+            gap: 10px;
         }
 
         button.btn {
             flex: 1;
-            padding: 14px 20px;
-            font-size: 0.95rem;
+            padding: 12px 14px;
+            font-size: clamp(0.85rem, 3.5vw, 0.95rem);
             font-weight: 700;
             border: none;
             border-radius: 12px;
@@ -285,13 +290,15 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 6px;
             transition: all 0.2s;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            -webkit-tap-highlight-color: transparent;
+            min-height: 44px; /* Tamaño de objetivo táctil recomendado por Apple/Android */
         }
 
         button.btn:active {
-            transform: scale(0.98);
+            transform: scale(0.96);
         }
 
         #next-btn {
@@ -299,9 +306,8 @@
             color: #ffffff;
         }
 
-        #next-btn:hover {
+        #next-btn:active {
             background-color: #4f46e5;
-            box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.4);
         }
 
         #reset-score-btn {
@@ -309,9 +315,8 @@
             color: #cbd5e1;
         }
 
-        #reset-score-btn:hover {
+        #reset-score-btn:active {
             background-color: #475569;
-            color: #f1f5f9;
         }
 
         /* Animaciones */
@@ -334,12 +339,13 @@
             animation: winPulse 0.5s ease-in-out 3;
         }
 
-        /* Responsivo en móviles muy pequeños */
-        @media (max-width: 380px) {
-            h1 { font-size: 1.8rem; }
-            .score-card { padding: 10px; }
-            .score-val { font-size: 1.5rem; }
-            .cell { font-size: 2.2rem; }
+        /* Ajustes específicos para móviles pequeños (e.g., iPhone SE) */
+        @media (max-height: 650px) {
+            .header-row { margin-bottom: 6px; }
+            .scoreboard { margin-bottom: 8px; }
+            #status { margin-bottom: 8px; height: 20px; }
+            .board-wrapper { margin-bottom: 10px; max-width: 310px; }
+            button.btn { padding: 10px 12px; min-height: 40px; }
         }
     </style>
 </head>
